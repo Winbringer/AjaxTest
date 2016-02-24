@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head  lang="ru">
+    <meta charset="UTF-8">
+    <style>
+      /*  form{
+            display: block;
+        }
+        .hidden{
+           visibility: hidden;
+        }*/
+      .hidden{
+          visibility: hidden;
+      }
+      .p1{
+          visibility: hidden;
+          color: red;
+      }
+        body {
+            font-family: 'Palatino Linotype', serif;
+            max-width: 600px;
+            padding: 0px 30px;
+        }
+        h1 {
+            margin-bottom: 0px;
+        }
+
+        form {
+
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        fieldset{
+            background-color: lightgoldenrodyellow;
+        }
+
+        legend {
+            padding: 0px 3px;
+            font-weight: bold;
+            font-variant: small-caps;
+        }
+
+        label {
+            width: 150px;
+            display: inline-block;
+            vertical-align: top;
+            margin: 6px;
+        }
+
+        input:focus {
+            background: #eaeaea;
+            outline: none;
+            border: 2px green;
+        }
+        input, textarea {
+            width: 150px;
+            height: 25px;
+            display: inline-block;
+            vertical-align: top;
+            margin: 6px;
+            border-radius: 10px;
+        }
+        input[type=button] {
+            transition: all,2s;
+            width: 100px;
+            height: 30px;
+            padding: 1px;
+            color: chartreuse;
+            background-color: lightseagreen;
+            margin-left: 40px;
+        }
+      input[type=button]:hover {
+          background-color:orange;
+          width: 170px;
+          margin-left: 6px;
+      }
+      input[type=submit]:hover {
+          background-color:orange;
+          width: 170px;
+          margin-left: 6px;
+      }
+      input[type=submit] {
+          transition: all,2s;
+          width: 100px;
+          height: 30px;
+          padding: 1px;
+          color: chartreuse;
+          background-color: lightseagreen;
+          margin-left: 40px;
+      }
+      input:required:invalid {
+          border:1px solid red;
+      }
+      input:valid {
+          border:1px solid green;
+      }
+        .main{
+            transition: all,2s;
+            margin-left: 50%;
+            background-color:ghostwhite;
+            width: 600px;
+        }
+    </style>
+<script src="jquery-1.4.3.min.js" type="text/javascript"></script>
+<script src="jquery.maskedinput.min.js"></script>
+    <script type='text/javascript'>	
+        function getXmlHttp(){
+            var xmlhttp;
+            try {
+                xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (E) {
+                    xmlhttp = false;
+                }
+            }
+            if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+                var XHR = window.XDomainRequest || window.XMLHttpRequest;
+                xmlhttp = new XHR();
+            }
+            return xmlhttp;
+        }
+        function start(tel){
+            var xmlhttp = getXmlHttp();
+            xmlhttp.open('GET', 'http://example.com/whats02082015/examples/contactsync.php?u='+tel, false);
+            xmlhttp.send(null);
+            if(xmlhttp.status == 200) {
+               return JSON.parse(xmlhttp.responseText);
+            }
+            return null;
+            /*
+            xhttp.onreadystatechange=function(){
+                if (xhttp.readyState==4){
+                    //Принятое содержимое json файла должно быть вначале обработано функцией eval
+                    var json=eval( '('+xhttp.responseText+')' );
+                    //Далее мы можем спокойно использовать данные
+                    document.getElementById('wrap').style.display='block';
+                    document.getElementById('res1').innerHTML=json.idphone;
+                    document.getElementById('res2').innerHTML=json.isWhatsApp;
+                    document.getElementById('res3').innerHTML=json.code;
+                } */
+
+        }
+        //Выбор элемента по css селектору
+        function getBySel(id) { return document.querySelector(id); }
+        var jsonServ;
+        var tel;
+        function ShowMessage() {
+            document.getElementById("p1").style.visibility = jsonServ.isWhatsApp == 1 ? "visible" : "hidden";
+        } //ShowMessage()
+        function ShowForm() {
+            if (jsonServ.isWhatsApp == 2) {
+                //Показать форму
+                var h = document.getElementsByClassName("hidden");
+                for (var index = 0; index < h.length; ++index)h[index].style.visibility = "visible";
+
+            } else {
+                 h = document.getElementsByClassName("hidden");
+                for ( index = 0; index < h.length; ++index)h[index].style.visibility = "hidden";
+            }
+        }//ShowForm()
+        function ParseTel() {
+            var input1 = document.getElementById("input1");
+           var tel = input1.value;
+            tel = tel.charAt(1) + tel.charAt(3) + tel.charAt(4) +
+            tel.charAt(5) + tel.charAt(7) + tel.charAt(8) +
+            tel.charAt(9) + tel.charAt(11) + tel.charAt(12) +
+            tel.charAt(14) + tel.charAt(15);
+            return tel;
+        } //ParseTel()
+        function GetAjaxJson(){
+            var form = getBySel("#auth");
+            if (form.checkValidity()===true) {
+                tel=ParseTel();
+                jsonServ= start(tel);
+                if(jsonServ!==null) {
+                    //Показать сообщение о несоответствии
+                    ShowMessage();
+                    ShowForm();
+                }
+            }
+        } //GetAjaxJson()
+        function goJs() {
+            var form = getBySel("#code");
+            if (form.checkValidity()===true) {
+                if (document.getElementById("input3").value == jsonServ.code) { /* alert("Спасибо!");*/
+                    window.location = "http://zakaztura.su/subwhats/examples/ad.php?u=" + tel;
+                }
+                else alert("Неверный код");
+            }
+        } //goJs()
+$(document).ready(function($){
+   $("#input1").mask("+7(999)999-99-99");
+});
+    </script>
+</head>
+<body>
+<div id='wrap' style='display:none;'>
+    <hr />
+    <p>idphone: <b><span id='res1'></span></b></p>
+    <p>isWhatsApp: <b><span id='res2'></span></b></p>
+    <p>code: <b><span id='res3'></span></b></p>
+    <hr />
+</div>
+<div class="main">
+<p>Если формат данных неверный поля будут подкрашиваться крассным<br>Правильно заполненое поле будет с зеленой рамкой<br>Формат телефонного номера: +7(000)000-00-00</p>
+<form action="#" method="get" id="auth">
+    <fieldset>
+    <legend>Форма подтверждения подписки WhatsApp</legend>
+    <label for="input1">Введите телефон</label>	
+	<input id="input1" name="tel" pattern="+7 ([0-9]{3}) [0-9]{3}-[0-9]{2}-[0-9]{2}" type="tel">
+   <!-- <input name="u" id="input1" type="tel" placeholder="  +7(000)000-00-00" autofocus required pattern="^[+][7][(]\d\d\d[)]\d\d\d[-]\d\d[-]\d\d$" autocomplete="off"> -->
+    <input id="input2" type="button" value="Подтвердить" onclick="GetAjaxJson()">
+    </fieldset>
+</form>
+<p id="p1" class="p1">Извините, ваш номер не использует WhatsApp</p>
+<form  action="#" class="hidden" id="code">
+    <fieldset class="hidden">
+        <legend>Форма ввода кода</legend>
+        <label for="input3" class="hiden">Введите код</label>
+        <input id="input3" type="text"  class="hiden"  placeholder="  Код" autocomplete="off" required>
+        <input id="input4" type="button" value="Подтвердить"  class="hiden" onclick="goJs()">
+    </fieldset>
+</form>
+</div>
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+<!-- Yandex.Metrika counter -->
+<!-- /Yandex.Metrika counter -->
+<!-- Google Analytics counter -->
+<!-- /Google Analytics counter -->
+</body>
+</html>
